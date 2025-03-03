@@ -71,17 +71,18 @@ grammar GCodes {
   rule g-code:sym<g18>   { 'G18' <g-code>? }
   rule g-code:sym<g19>   { 'G19' <g-code>? }
 
-  sub axis-check ($_) {
-    .gist.say;
+  sub token-check ($_) {
     my $t = .keys.head;
-    %*axes{ $t } ?? False !! %*axes{ $t } = 1
+    %*tokens{ $t } ?? False !! %*tokens{ $t } = 1
   }
 
-  token axis3 { [ <x> | <y> | <z> ]                   <?{ axis-check( $/ ) }> }
-  token axis6 { [ <x> | <y> | <z> | <a> | <b> | <c> ] <?{ axis-check( $/ ) }> }
+  token axis3 { [ <x> | <y> | <z> ]                   <?{ token-check( $/ ) }> }
+  token axis6 { [ <x> | <y> | <z> | <a> | <b> | <c> ] <?{ token-check( $/ ) }> }
+  token abc   { [ <a> | <b> | <c> ]                   <?{ token-check( $/ ) }> }
 
-  rule axes6 { :my %*axes; <axis6> ** 1..6 }
-  rule axes3 { :my %*axes; <axis3> ** 1..3 }
+  rule axes6 { :my %*tokens; <axis6> ** 1..6 }
+  rule axes3 { :my %*tokens; <axis3> ** 1..3 }
+  rule abc   { :my %*tokens; <abc>   ** 1..3 }
 
   rule g-code:sym<g28>   { 'G28'     <axes6>      }
   rule g-code:sym<g30>   { 'G30' <p> <axes6>      }
@@ -106,4 +107,14 @@ grammar GCodes {
 
   # cw: Missing G54-G59
   rule g-code:sym<g54-1> { 'G54.1' <p> }
+
+  rule g-code:sym<g60>   { 'G60' <axes3> }
+
+  rule g-code:sym<g61>   { 'G61' <g-code>?   }
+  rule g-code:sym<g64>   { 'G64' <g-code>?   }
+  rule g-code:sym<g65>   { 'G65' <p> <abc>   }
+  rule g-code:sym<g66>   { 'G66' <p> <abc>   }
+  rule g-code:sym<g67>   { 'G67' <g-code>?   }
+  rule g-code:sym<g68>   { 'G68' <x> <y> <r> }
+  rule g-code:sym<g69>   { 'G69' <g-code>?   }
 }
