@@ -27,6 +27,7 @@ grammar GCodes {
   token k   { 'K' <num> }
   token l   { 'L' <num> }
   token p   { 'P' <num> }
+  token q   { 'Q' <num> }
   token r   { 'R' <num> }
   token u   { 'U' <num> }
   token v   { 'V' <num> }
@@ -117,4 +118,35 @@ grammar GCodes {
   rule g-code:sym<g67>   { 'G67' <g-code>?   }
   rule g-code:sym<g68>   { 'G68' <x> <y> <r> }
   rule g-code:sym<g69>   { 'G69' <g-code>?   }
+
+  rule g-code:sym<g73>   { 'G73' <axes3> <r> <q> <f> }
+  rule g-code:sym<g74>   { 'G74' <axes3> <r> <f>     }
+  rule g-cpde:sym<g76>   { 'G76' <axes3> <r> <i> <j> <p> <f> }
+
+  rule g-code:sym<g80>   { 'G80' }
+  rule g-code:sym<g81>   { 'G81' <axes3> <r> <f> }
+
+  rule g-code:sym<g82>   { 'G82' <axes3> <r> <p> <f> }
+  rule g-code:sym<g83>   { 'G83' <axes3> <r> <q> <f> }
+
+  rule boring-args       { <axes3> <r> <f> }
+  rule boring-args2      { <axes3> <r> <p> <f> }
+
+  rule g-code:sym<g84>   { 'G84' <boring-args> }
+  rule g-code:sym<g85>   { 'G85' <boring-args> }
+  rule g-code:sym<g86>   { 'G86' <boring-args> }
+
+  rule g-code:sym<g87>   { 'G87' <axes3> <r> <i> <j> <f> }
+
+  rule g-code:sym<g88>   { 'G88' <boring-args2> }
+  rule g-code:sym<g89>   { 'G89' <boring-args2> }
+
+  rule g-code:sym<g90>   { 'G90'   <g-code>? }
+  rule g-code:syM<g90-1> { 'G90.1' <g-code>? }
+  rule g-code:sym<g91>   { 'G91'   <g-code>? }
+  rule g-code:sym<g91-1> { 'G91.1' <g-code>? }
+
+  rule g-code:sym<g92>   { 'G92' <axes3> <abc> }
+  rule g-code:sym<g92-1> { 'G92.1' <g-code>? }
+
 }
