@@ -10,9 +10,13 @@ grammar GCodes {
   }
 
   proto rule g-code { * }
+  proto rule m-code { * }
 
   rule commands {
-    :i <g-code>
+    :i [
+      <g-code> |
+      <m-code>
+    ]
   }
 
   token num { '-'? $<r>=\d+ $<f>=[ '.' \d+ ]? }
@@ -29,6 +33,8 @@ grammar GCodes {
   token p   { 'P' <num> }
   token q   { 'Q' <num> }
   token r   { 'R' <num> }
+  token s   { 'S' <num> }
+  token t   { 'T' <num> }
   token u   { 'U' <num> }
   token v   { 'V' <num> }
   token w   { 'W' <num> }
@@ -37,6 +43,7 @@ grammar GCodes {
   token z   { 'Z' <num> }
 
   rule xyz { <x> | <y> | <z> }
+
   rule ijk { <i> | <j> | <k> }
 
   rule arcpos {
@@ -124,17 +131,15 @@ grammar GCodes {
   rule g-code:sym<g74>   { 'G74' <axes3> <r> <f>     }
   rule g-cpde:sym<g76>   { 'G76' <axes3> <r>? <i>? <j>? <p>? <l>? <f>? }
 
-  rule g-code:sym<g80>   { 'G80' }
-  rule g-code:sym<g81>   { 'G81' <axes3> <r> <f> }
-
-  rule g-code:sym<g82>   { 'G82' <axes3> <r> <p> <f> }
-  rule g-code:sym<g83>   { 'G83' <axes3> <r> <q> <f> }
-
   rule boring-args       { <axes3> <r>? <p>? <l>? <f>? }
   rule boring-args2      { <axes3> <r>? <p>? <f>? }
 
   rule tapping-args      { <axes3> <r>? <p>? <l>? <f>? <j>? }
 
+  rule g-code:sym<g80>   { 'G80' }
+  rule g-code:sym<g81>   { 'G81' <axes3> <r> <f> }
+  rule g-code:sym<g82>   { 'G82'   <axes3> <r> <p> <f> }
+  rule g-code:sym<g83>   { 'G83'   <axes3> <r> <q> <f> }
   rule g-code:sym<g84>   { 'G84'   <boring-args>  }
   rule g-code:sym<g84-2> { 'G84.2' <tapping-args> }
   rule g-code:sym<g84-3> { 'G84.3' <tapping-args> }
@@ -148,15 +153,25 @@ grammar GCodes {
   rule g-code:syM<g90-1> { 'G90.1' <g-code>? }
   rule g-code:sym<g91>   { 'G91'   <g-code>? }
   rule g-code:sym<g91-1> { 'G91.1' <g-code>? }
-
-  rule g-code:sym<g92>   { 'G92' <axes6> }
+  rule g-code:sym<g92>   { 'G92'   <axes6>   }
   rule g-code:sym<g92-1> { 'G92.1' <g-code>? }
-  rule g-code:sym<g93>   { 'G93' <f>? }
-  rule g-code:sym<g94>   { 'G94' }
-  rule g-code:sym<g95>   { 'G95' }
-  rule g-code:sym<g96>   { 'G96' }
-  rule g-code:sym<g97>   { 'G97' }
-  rule g-code:sym<g98>   { 'G98' }
-  rule g-code:sym<g99>   { 'G99' }
+  rule g-code:sym<g93>   { 'G93'   <f>?      }
+  rule g-code:sym<g94>   { 'G94'   <g-code>? }
+  rule g-code:sym<g95>   { 'G95'   <g-code>? }
+  rule g-code:sym<g96>   { 'G96'   <g-code>? }
+  rule g-code:sym<g97>   { 'G97'   <g-code>? }
+  rule g-code:sym<g98>   { 'G98'   <g-code>? }
+  rule g-code:sym<g99>   { 'G99'   <g-code>? }
 
+  rule m-code:sym<m00>   { 'M00' }
+  rule m-code:sym<m01>   { 'M01' }
+  rule m-code:sym<m02>   { 'M02' }
+  rule m-code:sym<m03>   { 'M03' <s>? }
+  rule m-code:sym<m04>   { 'M04' <s>? }
+  rule m-code:sym<m05>   { 'M05' }
+  rule m-code:sym<m06>   { <t>? 'M06' }
+  rule m-code:sym<m07>   { 'M07' }
+  rule m-code:sym<m08>   { 'M08' }
+  rule m-code:sum<m09>   { 'M09' }
+  
 }
