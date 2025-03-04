@@ -44,18 +44,32 @@ grammar GCodes {
     <ijk> ** 2
   }
 
+  sub token-check ($_) {
+    my $t = .keys.head;
+    %*tokens{ $t } ?? False !! %*tokens{ $t } = 1
+  }
+
+  token axis3 { [ <x> | <y> | <z> ]                   <?{ token-check( $/ ) }> }
+  token axis6 { [ <x> | <y> | <z> | <a> | <b> | <c> ] <?{ token-check( $/ ) }> }
+  token abc   { [ <a> | <b> | <c> ]                   <?{ token-check( $/ ) }> }
+
+  rule axes2 { :my %*tokens; <axes3> ** 1..2 }
+  rule axes3 { :my %*tokens; <axis3> ** 1..3 }
+  rule axes6 { :my %*tokens; <axis6> ** 1..6 }
+  rule abc   { :my %*tokens; <abc>   ** 1..3 }
+
   # cw: May be another mode for g0, as I've seen it encompass multiple
   #     G-codes in the reference. Please investigate.
-  rule g-code:sym<g00>   { 'G00' [ <x> <y> <z> | <g-code> ] }
-  rule g-code:sym<g01>   { 'G01' <x> <y> <z>  }
+  rule g-code:sym<g00>   { 'G00' [ <axes3> | <g-code> ] }
+  rule g-code:sym<g01>   { 'G01' <axes3>  }
   rule g-code:sym<g02>   { 'G02' <arcpos> <f> }
-  rule g-code:sym<g03>   { 'G03' <xyz> ** 2 <r> <f> }
+  rule g-code:sym<g03>   { 'G03' <axes2> <r> <f> }
   rule g-code:sym<g04>   { 'G04' <p> }
   rule g-code:sym<g09>   { 'G09' <x> <y> <f> }
 
   rule g-code:sym<g10> {
     'G10' <l> [
-       <x> <y> <z> <a> <b> <c> |
+       <axes6> |
        <p> <z> <w> <d> <r> <x> <u> <y> <v> <q>
     ]
   }
@@ -66,30 +80,17 @@ grammar GCodes {
   rule g-code:sym<g13>   { 'G13' <circle-params> } # Counter-Clockwise
 
   rule g-code:sym<g15>   { 'G15' }
-  rule g-code:sym<g16>   { 'G16' [ <x> <y> <z> ]? }
+  rule g-code:sym<g16>   { 'G16' <axes3>? }
 
   rule g-code:sym<g17>   { 'G17' <g-code>? }
   rule g-code:sym<g18>   { 'G18' <g-code>? }
   rule g-code:sym<g19>   { 'G19' <g-code>? }
 
-  sub token-check ($_) {
-    my $t = .keys.head;
-    %*tokens{ $t } ?? False !! %*tokens{ $t } = 1
-  }
-
-  token axis3 { [ <x> | <y> | <z> ]                   <?{ token-check( $/ ) }> }
-  token axis6 { [ <x> | <y> | <z> | <a> | <b> | <c> ] <?{ token-check( $/ ) }> }
-  token abc   { [ <a> | <b> | <c> ]                   <?{ token-check( $/ ) }> }
-
-  rule axes6 { :my %*tokens; <axis6> ** 1..6 }
-  rule axes3 { :my %*tokens; <axis3> ** 1..3 }
-  rule abc   { :my %*tokens; <abc>   ** 1..3 }
-
-  rule g-code:sym<g28>   { 'G28'     <axes6>      }
-  rule g-code:sym<g30>   { 'G30' <p> <axes6>      }
-  rule g-code:sym<g31>   { 'G31' <x> <y> <z> <f>  }
-  rule g-code:sym<g32>   { 'G32' <x> <y> <z> <f>  }
-  rule g-code:sym<g40>   { 'G40' <g-code>?        }
+  rule g-code:sym<g28>   { 'G28'     <axes6>  }
+  rule g-code:sym<g30>   { 'G30' <p> <axes6>  }
+  rule g-code:sym<g31>   { 'G31' <axes3> <f>  }
+  rule g-code:sym<g32>   { 'G32' <axes3> <f>  }
+  rule g-code:sym<g40>   { 'G40' <g-code>?    }
 
   rule comp-args { <d> <axes3> <f> }
 
@@ -121,7 +122,7 @@ grammar GCodes {
 
   rule g-code:sym<g73>   { 'G73' <axes3> <r> <q> <f> }
   rule g-code:sym<g74>   { 'G74' <axes3> <r> <f>     }
-  rule g-cpde:sym<g76>   { 'G76' <axes3> <r> <i> <j> <p> <f> }
+  rule g-cpde:sym<g76>   { 'G76' <axes3> <r>? <i>? <j>? <p>? <l>? <f>? }
 
   rule g-code:sym<g80>   { 'G80' }
   rule g-code:sym<g81>   { 'G81' <axes3> <r> <f> }
@@ -129,24 +130,33 @@ grammar GCodes {
   rule g-code:sym<g82>   { 'G82' <axes3> <r> <p> <f> }
   rule g-code:sym<g83>   { 'G83' <axes3> <r> <q> <f> }
 
-  rule boring-args       { <axes3> <r> <f> }
-  rule boring-args2      { <axes3> <r> <p> <f> }
+  rule boring-args       { <axes3> <r>? <p>? <l>? <f>? }
+  rule boring-args2      { <axes3> <r>? <p>? <f>? }
 
-  rule g-code:sym<g84>   { 'G84' <boring-args> }
-  rule g-code:sym<g85>   { 'G85' <boring-args> }
-  rule g-code:sym<g86>   { 'G86' <boring-args> }
+  rule tapping-args      { <axes3> <r>? <p>? <l>? <f>? <j>? }
 
-  rule g-code:sym<g87>   { 'G87' <axes3> <r> <i> <j> <f> }
-
-  rule g-code:sym<g88>   { 'G88' <boring-args2> }
-  rule g-code:sym<g89>   { 'G89' <boring-args2> }
+  rule g-code:sym<g84>   { 'G84'   <boring-args>  }
+  rule g-code:sym<g84-2> { 'G84.2' <tapping-args> }
+  rule g-code:sym<g84-3> { 'G84.3' <tapping-args> }
+  rule g-code:sym<g85>   { 'G85'   <boring-args>  }
+  rule g-code:sym<g86>   { 'G86'   <boring-args>  }
+  rule g-code:sym<g87>   { 'G87'   <axes3> <r>? <i>? <j>? <p>? <l>? <f>? }
+  rule g-code:sym<g88>   { 'G88'   <boring-args2> }
+  rule g-code:sym<g89>   { 'G89'   <boring-args2> }
 
   rule g-code:sym<g90>   { 'G90'   <g-code>? }
   rule g-code:syM<g90-1> { 'G90.1' <g-code>? }
   rule g-code:sym<g91>   { 'G91'   <g-code>? }
   rule g-code:sym<g91-1> { 'G91.1' <g-code>? }
 
-  rule g-code:sym<g92>   { 'G92' <axes3> <abc> }
+  rule g-code:sym<g92>   { 'G92' <axes6> }
   rule g-code:sym<g92-1> { 'G92.1' <g-code>? }
+  rule g-code:sym<g93>   { 'G93' <f>? }
+  rule g-code:sym<g94>   { 'G94' }
+  rule g-code:sym<g95>   { 'G95' }
+  rule g-code:sym<g96>   { 'G96' }
+  rule g-code:sym<g97>   { 'G97' }
+  rule g-code:sym<g98>   { 'G98' }
+  rule g-code:sym<g99>   { 'G99' }
 
 }
