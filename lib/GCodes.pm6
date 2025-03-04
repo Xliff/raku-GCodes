@@ -9,13 +9,15 @@ grammar GCodes {
     :i <commands>+
   }
 
-  proto rule g-code { * }
-  proto rule m-code { * }
+  proto rule  g-code    { * }
+  proto rule  m-code    { * }
+  proto token misc-code { * }
 
   rule commands {
-    :i [
-      $<i>=<g-code> |
-      $<i>=<m-code>
+    :i $<i>=[
+      <g-code>    |
+      <m-code>    |
+      <misc-code>
     ]
   }
 
@@ -30,6 +32,7 @@ grammar GCodes {
   token j   { 'J' <num> }
   token k   { 'K' <num> }
   token l   { 'L' <num> }
+  token n   { 'N' <num> }
   token p   { 'P' <num> }
   token q   { 'Q' <num> }
   token r   { 'R' <num> }
@@ -190,4 +193,9 @@ grammar GCodes {
   rule m-code:sum<m98>   { $<code>='M98' <p> <q>? <l>? }
   rule m-code:sum<m99>   { $<code>='M99' <p>? }
 
+  token misc-code:<s>    { $<code>=<s> }
+  token misc-code:<t>    { $<code>=<t> }
+  token misc-code:<f>    { $<code>=<f> }
+  token misc-code:<p>    { $<code>=<p> }
+  token misc-code:<n>    { $<code>=<n> }
 }
